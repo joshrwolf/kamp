@@ -1,0 +1,5 @@
+---
+- hosts: all
+  gather_facts: yes
+  roles:
+    - { role: setup, pkgs: ["kubelet", "kubectl", "kubeadm", "yum-utils", "device-mapper-persistent-data", "lvm2", "containerd.io"] }

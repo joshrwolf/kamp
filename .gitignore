@@ -1,0 +1,4 @@
+.vagrant
+
+# Test registry storage folder
+mounted/

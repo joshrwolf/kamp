@@ -1,0 +1,80 @@
+---
+
+- name: Add Kubernetes APT GPG key
+  when: ansible_os_family == "Debian"
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add Kubernetes APT repository
+  when: ansible_os_family == "Debian"
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: 'kubernetes'
+
+- name: Add Kubernetes yum repository
+  when: ansible_os_family == "RedHat"
+  yum_repository:
+    name: Kubernetes
+    description: Kubernetes Repository
+    file: kubernetes
+    baseurl: http://yum.kubernetes.io/repos/kubernetes-el7-x86_64
+    enabled: yes
+    gpgcheck: no
+
+- name: Add containerd yum repository
+  when: ansible_os_family == "RedHat"
+  yum_repository:
+    name: Containerd
+    description: Docker Repository
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    enabled: yes
+    gpgcheck: no
+
+- name: Install kubernetes packages (RHEL/CentOS)
+  when: ansible_os_family == "RedHat"
+  yum:
+    name: "{{ pkgs }}"
+    update_cache: yes
+    state: installed
+  with_items: "{{ pkgs }}"
+
+- name: Install kubernetes packages (Debian/Ubuntu)
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "{{ pkgs }}"
+    update_cache: yes
+    state: installed
+  with_items: "{{ pkgs }}"
+
+# - name: Create containerd locations
+#   file:
+#     path: /tmp/containerd
+#     state: directory
+#     mode: '0755'
+
+# - name: Fetch Containerd
+#   unarchive:
+#     src: "https://github.com/containerd/containerd/releases/download/v1.3.0/containerd-1.3.0.linux-amd64.tar.gz"
+#     dest: "/tmp/containerd"
+#     remote_src: yes
+
+# - name: Create directory for cni binary
+#   file:
+#     path: /opt/cni/bin/
+#     state: directory
+#     mode: '0755'
+
+# - name: Create directory for cni config files
+#   file:
+#     path: /etc/cni/net.d/
+#     state: directory
+#     mode: '0755'
+
+# - name: Start containerd
+#   systemd:
+#     name: containerd
+#     daemon-reload: yes
+#     state: started
+#     enabled: yes
